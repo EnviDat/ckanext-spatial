@@ -19,7 +19,7 @@ this.ckan.module('spatial-query', function ($, _) {
     template: {
       buttons: [
         '<div id="dataset-map-edit-buttons">',
-        '<a href="javascript:;" class="btn cancel">Cancel</a> ',
+        '<a href="javascript:;" class="btn cancel disabled">Cancel</a> ',
         '<a href="javascript:;" class="btn apply disabled">Apply</a>',
         '</div>'
       ].join('')
@@ -69,7 +69,7 @@ this.ckan.module('spatial-query', function ($, _) {
       var extentLayer;
       var previous_box;
       var previous_extent;
-      var is_exanded = false;
+      //var is_exanded = true;
       var should_zoom = true;
       var form = $("#dataset-search");
       // CKAN 2.1
@@ -108,39 +108,41 @@ this.ckan.module('spatial-query', function ($, _) {
         }
       }));
 
+
       // OK add the expander
-      $('a.leaflet-draw-draw-rectangle', module.el).on('click', function(e) {
-        if (!is_exanded) {
-          $('body').addClass('dataset-map-expanded');
-          if (should_zoom && !extentLayer) {
-            map.zoomIn();
-          }
-          resetMap();
-          is_exanded = true;
-        }
-      });
+      //$('a.leaflet-draw-draw-rectangle', module.el).on('click', function(e) {
+        //if (!is_exanded) {
+          //$('body').addClass('dataset-map-expanded');
+          //}
+          //resetMap();
+          //is_exanded = true;
+        //}
+      //});
 
       // Setup the expanded buttons
       buttons = $(module.template.buttons).insertBefore('#dataset-map-attribution');
 
       // Handle the cancel expanded action
       $('.cancel', buttons).on('click', function() {
-        $('body').removeClass('dataset-map-expanded');
+        //$('body').removeClass('dataset-map-expanded');
         if (extentLayer) {
           map.removeLayer(extentLayer);
         }
         setPreviousExtent();
         setPreviousBBBox();
         resetMap();
-        is_exanded = false;
+        //is_exanded = false;
       });
 
       // Handle the apply expanded action
       $('.apply', buttons).on('click', function() {
         if (extentLayer) {
-          $('body').removeClass('dataset-map-expanded');
-          is_exanded = false;
-          resetMap();
+          //$('body').removeClass('dataset-map-expanded');
+          //is_exanded = false;
+          //resetMap();
+
+          //map.zoomIn();
+
           // Eugh, hacky hack.
           setTimeout(function() {
             map.fitBounds(extentLayer.getBounds());
@@ -158,6 +160,7 @@ this.ckan.module('spatial-query', function ($, _) {
         $('#ext_bbox').val(extentLayer.getBounds().toBBoxString());
         map.addLayer(extentLayer);
         $('.apply', buttons).removeClass('disabled').addClass('btn-primary');
+        $('.cancel', buttons).removeClass('disabled');
       });
 
       // Record the current map view so we can replicate it after submitting
@@ -171,9 +174,9 @@ this.ckan.module('spatial-query', function ($, _) {
       setPreviousExtent();
 
       // OK, when we expand we shouldn't zoom then
-      map.on('zoomstart', function(e) {
-        should_zoom = false;
-      });
+      //map.on('zoomstart', function(e) {
+      //  should_zoom = false;
+      //});
 
 
       // Is there an existing box from a previous search?
