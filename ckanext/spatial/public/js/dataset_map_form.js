@@ -6,10 +6,22 @@ this.ckan.module('dataset-map', function (jQuery, _) {
       i18n: {
       },
       styles: {
+        point_grey:{
+          iconUrl: '/img/marker_grey.png',
+          iconSize: [14, 25],
+          iconAnchor: [7, 25]
+        },
         point:{
           iconUrl: '/img/marker.png',
           iconSize: [14, 25],
           iconAnchor: [7, 25]
+        },
+        box_grey:{
+          color: '#726864',
+          weight: 2,
+          opacity: 1,
+          fillColor: '#FCF6CF',
+          fillOpacity: 0.4
         },
         default_:{
           color: '#B52',
@@ -62,13 +74,15 @@ this.ckan.module('dataset-map', function (jQuery, _) {
 
       map = ckan.commonLeafletMap('dataset-map-container', this.options.map_config, {attributionControl: false});
 
-      //      var ckanIcon = L.Icon.extend({options: this.options.styles.point});
+      // EXTENT LAYER
+      var ckanIcon = L.Icon.extend({options: this.options.styles.point_grey});
 
       var extentLayer = L.geoJson(this.extent, {
-          style: this.options.styles.default_,
+          style: this.options.styles.box_grey,
           pointToLayer: function (feature, latLng) {
             return new L.Marker(latLng, {icon: new ckanIcon})
           }});
+
       extentLayer.addTo(map);
 
       if (this.extent.type == 'Point'){
@@ -77,6 +91,7 @@ this.ckan.module('dataset-map', function (jQuery, _) {
         map.fitBounds(extentLayer.getBounds());
       }
 
+      // DRAW LAYER
       // Initialise the FeatureGroup to store editable layers
       var drawnItems = new L.FeatureGroup();
       map.addLayer(drawnItems);
@@ -98,11 +113,50 @@ this.ckan.module('dataset-map', function (jQuery, _) {
       var layer = e.layer,
   		gContent = layer.toGeoJSON ?
       	JSON.stringify(layer.toGeoJSON().geometry) : "(no data)";
+      // delete previous geometry (currently no multi-points/polygons allowed)
+      drawnItems.clearLayers();
       drawnItems.addLayer(layer);
       // To Do: save to EnviDat Spatial Extent field (multi-points not covered just yet)
-      // document.getElementById("field-spatial").value = gContent;
+      //document.getElementById("field-spatial").value = gContent;
       layer.bindPopup(gContent).openPopup();
       });
+
+      // CUSTOM CONTROL
+      var applyButton = L.Control.extend({
+        options: {
+          position: 'topright'
+        },
+
+        onAdd: function (map) {
+          var container = L.DomUtil.create('input', 'leaflet-bar leaflet-control leaflet-control-custom');
+          container.type="button";
+          container.value = "Apply";
+
+          container.style.backgroundColor = 'rgb(32, 107, 130)';
+          container.style.color = 'white';
+          //container.style.width = '30px';
+          container.style.height = '30px';
+
+          container.title="Set field to new value or restore original";
+
+          container.onclick = function(){
+            var drawnFeatures = drawnItems.toGeoJSON().features;
+            if (typeof drawnFeatures !== 'undefined' && drawnFeatures.length > 0) {
+              var newExtent = JSON.stringify(drawnFeatures[0].geometry);
+
+              //Save to EnviDat Spatial Extent field (multi-points/polygons not covered just yet)
+              document.getElementById("field-spatial").value = newExtent;
+            }
+            else {
+              //REstore inital value to EnviDat Spatial Extent field
+              var initialExtent = JSON.stringify(extentLayer.toGeoJSON().features[0].geometry)
+              document.getElementById("field-spatial").value = initialExtent;
+            }
+          }
+          return container;
+         }
+      });
+     map.addControl(new applyButton());
     }
   }
 });
