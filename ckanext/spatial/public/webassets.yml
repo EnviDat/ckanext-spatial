@@ -9,6 +9,17 @@ dataset_map_js:
     - js/common_map.js
     - js/dataset_map.js
 
+dataset_map_form_js:
+  filter: rjsmin
+  output: ckanext-spatial/%(version)s_dataset_map_form.js
+  extra:
+    preload:
+      - base/main
+  contents:
+    - js/vendor/leaflet/leaflet.js
+    - js/common_map.js
+    - js/dataset_map_form.js
+
 dataset_map_css:
   filters: cssrewrite
   output: ckanext-spatial/%(version)s_dataset_map.css
