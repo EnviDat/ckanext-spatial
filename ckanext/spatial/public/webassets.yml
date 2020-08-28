@@ -17,6 +17,7 @@ dataset_map_form_js:
       - base/main
   contents:
     - js/vendor/leaflet/leaflet.js
+    - js/vendor/leaflet.draw/leaflet.draw.js
     - js/common_map.js
     - js/dataset_map_form.js
 
