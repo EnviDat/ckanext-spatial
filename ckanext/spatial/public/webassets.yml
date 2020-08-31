@@ -21,6 +21,15 @@ dataset_map_form_js:
     - js/common_map.js
     - js/dataset_map_form.js
 
+dataset_map_form_css:
+  filters: cssrewrite
+  output: ckanext-spatial/%(version)s_dataset_map_form.css
+  contents:
+    - js/vendor/leaflet/leaflet.css
+    - js/vendor/leaflet.draw/leaflet.draw.css
+    - css/dataset_map_form.css
+    - css/dataset_map.css
+
 dataset_map_css:
   filters: cssrewrite
   output: ckanext-spatial/%(version)s_dataset_map.css
