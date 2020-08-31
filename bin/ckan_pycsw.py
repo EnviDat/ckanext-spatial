@@ -14,6 +14,7 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 log = logging.getLogger(__name__)
 
+
 def setup_db(pycsw_config):
     """Setup database tables and indexes"""
 
@@ -28,9 +29,9 @@ def setup_db(pycsw_config):
     ]
 
     pycsw.core.admin.setup_db(database,
-        table_name, '',
-        create_plpythonu_functions=False,
-        extra_columns=ckan_columns)
+                              table_name, '',
+                              create_plpythonu_functions=False,
+                              extra_columns=ckan_columns)
 
 
 def set_keywords(pycsw_config_file, pycsw_config, ckan_url, limit=20):
@@ -54,7 +55,6 @@ def set_keywords(pycsw_config_file, pycsw_config, ckan_url, limit=20):
 
 
 def load(pycsw_config, ckan_url):
-
     database = pycsw_config.get('repository', 'database')
     table_name = pycsw_config.get('repository', 'table', 'records')
 
@@ -75,7 +75,7 @@ def load(pycsw_config, ckan_url):
         response = requests.get(url)
         listing = response.json()
         if not isinstance(listing, dict):
-            raise RuntimeError, 'Wrong API response: %s' % listing
+            raise RuntimeError('Wrong API response: %s' % listing)
         results = listing.get('results')
         if not results:
             break
@@ -111,11 +111,10 @@ def load(pycsw_config, ckan_url):
     for ckan_id in deleted:
         try:
             repo.session.begin()
-            repo.session.query(repo.dataset.ckan_id).filter_by(
-            ckan_id=ckan_id).delete()
+            repo.session.query(repo.dataset.ckan_id).filter_by(ckan_id=ckan_id).delete()
             log.info('Deleted %s' % ckan_id)
             repo.session.commit()
-        except Exception, err:
+        except Exception as err:
             repo.session.rollback()
             raise
 
@@ -128,7 +127,7 @@ def load(pycsw_config, ckan_url):
         try:
             repo.insert(record, 'local', util.get_today_and_now())
             log.info('Inserted %s' % ckan_id)
-        except Exception, err:
+        except Exception as err:
             log.error('ERROR: not inserted %s Error:%s' % (ckan_id, err))
 
     for ckan_id in changed:
@@ -137,21 +136,20 @@ def load(pycsw_config, ckan_url):
         if not record:
             continue
         update_dict = dict([(getattr(repo.dataset, key),
-        getattr(record, key)) \
-        for key in record.__dict__.keys() if key != '_sa_instance_state'])
+                             getattr(record, key)) \
+                            for key in record.__dict__.keys() if key != '_sa_instance_state'])
         try:
             repo.session.begin()
             repo.session.query(repo.dataset).filter_by(
-            ckan_id=ckan_id).update(update_dict)
+                ckan_id=ckan_id).update(update_dict)
             repo.session.commit()
             log.info('Changed %s' % ckan_id)
-        except Exception, err:
+        except Exception as err:
             repo.session.rollback()
-            raise RuntimeError, 'ERROR: %s' % str(err)
+            raise RuntimeError('ERROR: %s' % str(err))
 
 
 def clear(pycsw_config):
-
     from sqlalchemy import create_engine, MetaData, Table
 
     database = pycsw_config.get('repository', 'database')
@@ -174,13 +172,13 @@ def get_record(context, repo, ckan_url, ckan_id, ckan_info):
 
     try:
         xml = etree.parse(io.BytesIO(response.content))
-    except Exception, err:
+    except Exception as err:
         log.error('Could not pass xml doc from %s, Error: %s' % (ckan_id, err))
         return
 
     try:
         record = metadata.parse_record(context, xml, repo)[0]
-    except Exception, err:
+    except Exception as err:
         log.error('Could not extract metadata from %s, Error: %s' % (ckan_id, err))
         return
 
@@ -192,7 +190,7 @@ def get_record(context, repo, ckan_url, ckan_id, ckan_info):
     return record
 
 
-usage='''
+usage = '''
 Manages the CKAN-pycsw integration
 
     python ckan-pycsw.py setup [-p]
@@ -219,6 +217,7 @@ The load command requires a CKAN URL from where the datasets will be pulled:
 
 '''
 
+
 def _load_config(file_path):
     abs_path = os.path.abspath(file_path)
     if not os.path.exists(abs_path):
@@ -230,7 +229,6 @@ def _load_config(file_path):
     return config
 
 
-
 import os
 import argparse
 from ConfigParser import SafeConfigParser
@@ -240,15 +238,15 @@ if __name__ == '__main__':
         description='\n'.split(usage)[0],
         usage=usage)
     parser.add_argument('command',
-         help='Command to perform')
+                        help='Command to perform')
 
     parser.add_argument('-p', '--pycsw_config',
-         action='store', default='default.cfg',
-         help='pycsw config file to use.')
+                        action='store', default='default.cfg',
+                        help='pycsw config file to use.')
 
     parser.add_argument('-u', '--ckan_url',
-         action='store',
-         help='CKAN instance to import the datasets from.')
+                        action='store',
+                        help='CKAN instance to import the datasets from.')
 
     if len(sys.argv) <= 1:
         parser.print_usage()
@@ -270,5 +268,5 @@ if __name__ == '__main__':
     elif arg.command == 'clear':
         clear(pycsw_config)
     else:
-        print 'Unknown command {0}'.format(arg.command)
+        print('Unknown command {0}'.format(arg.command))
         sys.exit(1)
