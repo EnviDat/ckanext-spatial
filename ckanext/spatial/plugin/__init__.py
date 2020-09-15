@@ -228,7 +228,8 @@ class SpatialQuery(SpatialQueryMixin, p.SingletonPlugin):
                 if not wkt:
                     shape = shapely.geometry.asShape(geometry)
                     if not shape.is_valid:
-                        log.error('Wrong geometry, not indexing')
+                        log.error('Wrong geometry, not indexing package {0}'.format(pkg_dict.get('name')))
+
                         return pkg_dict
                     wkt = shape.wkt
 
