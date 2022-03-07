@@ -4,6 +4,6 @@ Shapely==1.7.*
 OWSLib==0.18.0
 lxml==4.6.*
 argparse
-pyparsing==3.7.*
+pyparsing==3.0.*
 requests==2.27.*
 six
